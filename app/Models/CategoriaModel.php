@@ -24,4 +24,8 @@ class CategoriaModel extends Model
     {
         return $this->hasMany(ProductoModel::class, 'categoria_id');
     }
+
+    const PRINCIPAL = 'terciario';
+    const SECUNDARIO = 'terciario';
+    const TERCIARIO = 'terciario';
 }

@@ -1,90 +1,72 @@
-import { useState } from 'react';
-import { Head, router, usePage, useForm } from '@inertiajs/react';
+import { useState, useEffect } from 'react';
+import { Head, router, useForm } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Swal from 'sweetalert2';
 import ModalMenuProductoFormulario from './Components/ModalMenuProductoFormulario';
 
 export default function Update({ menu, productos }) {
-    console.log(menu);
-
-    const { data, post, get, put, processing, reset, errors, setData, setError } = useForm({
+    const { data, post, put, setData } = useForm({
         id: menu?.id || null,
         nombre: menu?.nombre || '',
         descripcion: menu?.descripcion || '',
         menu_productos: menu?.menu_productos || [],
-        producto : null
-        // 'fecha',  // no editable
-        // 'actual'  // no editable
     });
+
     const [showProductModal, setShowProductModal] = useState(false);
+    const [isEdit] = useState(!!menu?.id); // Definimos isEdit correctamente
 
-    const handleDelete = (index, producto) => {
+    const handleDelete = (index) => {
+        const updatedProducts = [...data.menu_productos];
+        updatedProducts.splice(index, 1);
+        setData('menu_productos', updatedProducts);
+        const { id } = data.menu_productos[index]
 
-    }
+        router.visit(`/menu-producto/${id}`,
+            {
+                method: 'delete',
+                preserveScroll: true
+            });
+    };
 
     const addProducto = (producto) => {
-        Swal.fire({
-            title: 'Producto agregado',
-            text: `Has seleccionado ${producto.nombre}`,
-            icon: 'success',
-            timer: 2000
-        });
-
         const productoCombos = {
             completo: 0,
             descripcion: "sin descripción",
             menu: menu.id,
-            adicionable : true,
+            adicionable: true,
             precio: producto.precio,
             precio_combo: 0,
             producto_id: producto.id,
             producto: { ...producto },
-            combos: []  // Añadir array vacío de combos
+            combos: []
         };
 
         setData('menu_productos', [...data.menu_productos, productoCombos]);
         setShowProductModal(false);
-
-        post(route('menu-producto.store'),{
-            onSuccess: () => {
-                Swal.fire({
-                    title: 'Éxito',
-                    text: isEdit ? 'Cliente actualizada' : 'Cliente creada',
-                    timer: 2000,
-                    showConfirmButton: false, // Esta línea oculta el botón OK
-                    timerProgressBar: true // Opcional: muestra una barra de progreso
-                });
-            }
-        })
-    }
+    };
 
     const handleEditProduct = (index, producto) => {
-        console.log("index", index);
-        console.log("producto", producto);
-    }
+        // Implementa la lógica de edición aquí
+    };
 
-    // // Actualizar menú
     const submitMenuUpdate = (e) => {
         e.preventDefault();
-
         put(route('menu.update', data.id), {
-            preserveScroll: true
-        }, {
             onSuccess: () => {
                 Swal.fire({
                     title: 'Éxito',
-                    text: isEdit ? 'Cliente actualizada' : 'Cliente creada',
+                    text: 'Menú actualizado correctamente',
                     timer: 2000,
-                    showConfirmButton: false, // Esta línea oculta el botón OK
-                    timerProgressBar: true // Opcional: muestra una barra de progreso
+                    showConfirmButton: false,
+                    timerProgressBar: true
                 });
             },
-            onError: (errors) => {
+            onError: () => {
                 Swal.fire({
                     title: 'Error',
-                    text: 'Por favor corrige los errores',
-                    timer: 2000,
-                    showConfirmButton: false
+                    text: 'Error al actualizar el menú',
+                    icon: 'error',
+                    timer: 2000
                 });
             }
         });
@@ -152,44 +134,40 @@ export default function Update({ menu, productos }) {
                             </form>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <div className="py-2">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
                     <div className="bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                        <div className="">
-                            <div className="flex justify-between w-full items-center p-2 px-2">
-                                <h3 className="text-lg font-medium py-4 text-gray-900 dark:text-white">
-                                    Lista de productos agregados
+                        <div className="p-4">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                                    Productos del Menú
                                 </h3>
-
                                 <button
                                     onClick={() => setShowProductModal(true)}
-                                    className="flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200"
+                                    className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg"
+                                    aria-label="Agregar nuevo producto"
                                 >
                                     <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                                     </svg>
                                     Nuevo
                                 </button>
                             </div>
 
-
                             <div className="overflow-x-auto">
                                 <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                     <thead className="bg-gray-50 dark:bg-gray-700">
                                         <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Producto</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Combos</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estado</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
+                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Producto</th>
+                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Combos</th>
+                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estado</th>
+                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-
                                         {data.menu_productos.map((menuProducto, index) => (
-                                            <tr key={menuProducto.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                            <tr key={`product-${menuProducto.id}-${index}`} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                                {/* Celdas de la tabla... */}
+
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <div className="flex items-center">
                                                         <div className="ml-4">
@@ -247,40 +225,26 @@ export default function Update({ menu, productos }) {
                                                 </td>
 
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <button
-                                                        onClick={() => handleEditProduct(index, menuProducto)}
-                                                        className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 p-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
-                                                    >
-                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                                                            </path>
-                                                        </svg>
-                                                    </button>
-
-                                                    <button
-                                                        onClick={() => handleDelete(index, menuProducto)}
-                                                        className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-1 rounded-md hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
-                                                        title="Eliminar"
-                                                    >
-                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                                                            </path>
-                                                        </svg>
-                                                    </button>
-
-                                                    <button
-                                                        onClick={() => handleDelete(index, menuProducto)}
-                                                        className="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300 p-1 rounded-md hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
-                                                        title="Agregar Combo"
-                                                    >
-                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                                                                d="M12 6v6m0 0v6m0-6h6m-6 0H6">
-                                                            </path>
-                                                        </svg>
-                                                    </button>
+                                                    <div className="flex space-x-2">
+                                                        <button
+                                                            onClick={() => handleEditProduct(index, menuProducto)}
+                                                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 p-1"
+                                                            aria-label="Editar producto"
+                                                        >
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                            </svg>
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDelete(index)}
+                                                            className="text-red-600 hover:text-red-900 dark:text-red-400 p-1"
+                                                            aria-label="Eliminar producto"
+                                                        >
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                            </svg>
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}
@@ -298,59 +262,8 @@ export default function Update({ menu, productos }) {
                 productos={productos}
                 addProducto={addProducto}
                 menu_productos={data.menu_productos}
+                menu={menu}
             />
-        </AuthenticatedLayout >
+        </AuthenticatedLayout>
     );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,22 +1,31 @@
 import { useState, useEffect } from 'react';
 import Modal from '@/Components/Modal';
 import Swal from 'sweetalert2';
+import { router, useForm } from '@inertiajs/react';
 
-export default function ModalMenuProductoFormulario({ productos,addProducto ,showProductModal, setShowProductModal, menu_productos }) {
-    // Estados para paginación y búsqueda
-    console.log('productos',productos);
-    console.log('menu_productos',menu_productos)
+export default function ModalMenuProductoFormulario({
+    productos,
+    addProducto,
+    showProductModal,
+    setShowProductModal,
+    menu_productos,
+    menu
+}) {
+    const { data, setData, post, update } = useForm({
+        id: menu.id,
+        producto: null
+    });
+
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(10); // Productos por página
+    const [itemsPerPage] = useState(10);
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredProducts, setFilteredProducts] = useState([]);
+    const [selectedProduct, setSelectedProduct] = useState(null);
 
     useEffect(() => {
         const filtered = productos.filter(producto => {
-            // Verificar si el producto NO está en menu_productos
             const isNotInMenu = !menu_productos.some(item => item.producto_id === producto.id);
 
-            // Si hay término de búsqueda, aplicar ambos filtros
             if (searchTerm) {
                 const searchTermLower = searchTerm.toLowerCase();
                 return isNotInMenu && [
@@ -26,66 +35,117 @@ export default function ModalMenuProductoFormulario({ productos,addProducto ,sho
                 ].some(text => text?.includes(searchTermLower));
             }
 
-            // Si no hay término de búsqueda, solo filtrar por no estar en menu
             return isNotInMenu;
         });
 
         setFilteredProducts(filtered);
-        setCurrentPage(1); // Resetear a la primera página al buscar
-    }, [searchTerm, productos, menu_productos]); // Añadir menu_productos a las dependencias
+        setCurrentPage(1);
+    }, [searchTerm, productos, menu_productos]);
 
-    // Calcular productos para la página actual
+    useEffect(() => {
+        if (showProductModal) {
+            document.getElementById('search-product-input')?.focus();
+        }
+    }, [showProductModal]);
+
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentProducts = filteredProducts.slice(indexOfFirstItem, indexOfLastItem);
     const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
-    // Cambiar página
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-    // Seleccionar producto
-    const [selectedProduct, setSelectedProduct] = useState(null);
+    const submitAddProducto = (producto) => {
+        // e.preventDefault();
+        addProducto(producto);
+        setData('producto', { ...data.producto, producto });
+
+        router.visit('/menu-producto', {
+            method : 'post',
+            preserveScroll : true,
+            data: {
+                producto: producto,
+                menu: menu
+            }, onSuccess: () => {
+                Swal.fire({
+                    title: 'Éxito',
+                    text: 'Producto agregado correctamente',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    timerProgressBar: true
+                });
+            }
+        });
+        // post(route('menu-producto.store'), {
+
+        // }, {
+        //     onSuccess: () => {
+        //         Swal.fire({
+        //             title: 'Éxito',
+        //             text: 'Producto agregado correctamente',
+        //             timer: 2000,
+        //             showConfirmButton: false,
+        //             timerProgressBar: true
+        //         });
+        //     }
+        // });
+    }
 
     return (
-        <Modal show={showProductModal} onClose={() => setShowProductModal(false)} maxWidth="5xl">
+        <Modal
+            show={showProductModal}
+            onClose={() => setShowProductModal(false)}
+            maxWidth="5xl"
+            aria-modal="true"
+            role="dialog"
+        >
             <div className="p-6">
-                <div className="flex justify-between w-full items-center mb-4">
+                <div className="flex justify-between items-center mb-4">
                     <h2 className="text-lg font-medium text-gray-900 dark:text-white">
-                        Lista de productos
+                        Seleccionar Productos
                     </h2>
+                    <button
+                        onClick={() => setShowProductModal(false)}
+                        className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                        aria-label="Cerrar modal"
+                    >
+                        ✕
+                    </button>
                 </div>
 
-                {/* Barra de búsqueda */}
                 <div className="mb-4">
                     <input
+                        id="search-product-input"
                         type="text"
                         placeholder="Buscar productos..."
                         className="w-full p-2 border rounded-md dark:bg-gray-700 dark:text-white"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
+                        aria-label="Buscar productos"
                     />
                 </div>
 
-                {/* Lista de productos */}
-                <div className="mb-4 max-h-96 overflow-y-auto">
+                {/* <div className="mb-4 max-h-96 overflow-y-auto">
                     {currentProducts.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {currentProducts.map((producto) => (
                                 <div
-                                    key={producto.id}
-                                    onClick={() => addProducto(producto)}
-                                    className={`p-4 border rounded-md cursor-pointer transition-colors ${
-                                        selectedProduct?.id === producto.id
+                                    key={`product-select-${producto.id}`}
+                                    onClick={() => {
+                                        submitAddProducto(producto);
+                                    }}
+                                    role="button"
+                                    tabIndex="0"
+                                    aria-label={`Seleccionar ${producto.nombre}`}
+                                    onKeyPress={(e) => e.key === 'Enter' && addProducto(producto)}
+                                    className={`p-4 border rounded-md cursor-pointer transition-colors ${selectedProduct?.id === producto.id
                                             ? 'bg-blue-100 dark:bg-blue-900 border-blue-500'
                                             : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-                                    }`}
+                                        }`}
                                 >
                                     <h3 className="font-medium text-gray-900 dark:text-white">
                                         {producto.nombre}
                                     </h3>
-                                    {/* <p className="text-sm text-gray-600 dark:text-gray-300">
-                                        {producto.descripcion || 'Sin descripción'}
-                                    </p> */}
                                     <p className="text-sm font-semibold mt-2">
                                         Precio: {producto.precio}
                                     </p>
@@ -94,44 +154,85 @@ export default function ModalMenuProductoFormulario({ productos,addProducto ,sho
                         </div>
                     ) : (
                         <p className="text-center py-4 text-gray-500 dark:text-gray-400">
-                            No se encontraron productos
+                            No se encontraron productos disponibles
+                        </p>
+                    )}
+                </div> */}
+
+                <div className="mb-4 max-h-96 overflow-y-auto">
+                    {currentProducts.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {currentProducts.map((producto) => (
+                                <form
+                                    key={`product-form-${producto.id}`}
+                                    onSubmit={(e) => {
+                                        e.preventDefault();
+                                        submitAddProducto(producto);
+                                    }}
+                                    className="contents" // Esto evita que el form afecte el layout
+                                >
+                                    <div
+                                        role="button"
+                                        tabIndex="0"
+                                        aria-label={`Agregar ${producto.nombre}`}
+                                        className={`p-4 border rounded-md cursor-pointer transition-colors ${selectedProduct?.id === producto.id
+                                            ? 'bg-blue-100 dark:bg-blue-900 border-blue-500'
+                                            : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                                            }`}
+                                    >
+                                        <input
+                                            type="hidden"
+                                            name="producto_id"
+                                            value={producto.id}
+                                        />
+                                        <h3 className="font-medium text-gray-900 dark:text-white">
+                                            {producto.nombre}
+                                        </h3>
+                                        <p className="text-sm font-semibold mt-2">
+                                            Precio: {producto.precio}
+                                        </p>
+                                        <button
+                                            type="submit"
+                                            className="mt-2 w-full py-1 bg-green-600 text-white rounded hover:bg-green-700"
+                                            aria-label={`Confirmar agregar ${producto.nombre}`}
+                                        >
+                                            Agregar
+                                        </button>
+                                    </div>
+                                </form>
+                            ))}
+                        </div>
+                    ) : (
+                        <p className="text-center py-4 text-gray-500 dark:text-gray-400">
+                            No se encontraron productos disponibles
                         </p>
                     )}
                 </div>
 
-                {/* Paginación */}
                 {totalPages > 1 && (
                     <div className="flex justify-center mt-4">
-                        <nav className="inline-flex rounded-md shadow">
+                        <nav className="inline-flex rounded-md shadow" aria-label="Paginación">
                             <button
                                 onClick={() => paginate(Math.max(1, currentPage - 1))}
                                 disabled={currentPage === 1}
-                                className="px-3 py-1 rounded-l-md border border-gray-300 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white disabled:opacity-50"
+                                className="px-3 py-1 rounded-l-md border border-gray-300 bg-white dark:bg-gray-700 disabled:opacity-50"
+                                aria-label="Página anterior"
                             >
                                 Anterior
                             </button>
 
                             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                let pageNum;
-                                if (totalPages <= 5) {
-                                    pageNum = i + 1;
-                                } else if (currentPage <= 3) {
-                                    pageNum = i + 1;
-                                } else if (currentPage >= totalPages - 2) {
-                                    pageNum = totalPages - 4 + i;
-                                } else {
-                                    pageNum = currentPage - 2 + i;
-                                }
-
+                                const pageNum = calculatePageNumber(i, currentPage, totalPages);
                                 return (
                                     <button
-                                        key={pageNum}
+                                        key={`page-${pageNum}`}
                                         onClick={() => paginate(pageNum)}
-                                        className={`px-3 py-1 border-t border-b border-gray-300 ${
-                                            currentPage === pageNum
-                                                ? 'bg-blue-500 text-white'
-                                                : 'bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white'
-                                        }`}
+                                        className={`px-3 py-1 border-t border-b border-gray-300 ${currentPage === pageNum
+                                            ? 'bg-blue-500 text-white'
+                                            : 'bg-white dark:bg-gray-700'
+                                            }`}
+                                        aria-label={`Ir a página ${pageNum}`}
+                                        aria-current={currentPage === pageNum ? 'page' : undefined}
                                     >
                                         {pageNum}
                                     </button>
@@ -141,7 +242,8 @@ export default function ModalMenuProductoFormulario({ productos,addProducto ,sho
                             <button
                                 onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
                                 disabled={currentPage === totalPages}
-                                className="px-3 py-1 rounded-r-md border border-gray-300 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white disabled:opacity-50"
+                                className="px-3 py-1 rounded-r-md border border-gray-300 bg-white dark:bg-gray-700 disabled:opacity-50"
+                                aria-label="Página siguiente"
                             >
                                 Siguiente
                             </button>
@@ -151,4 +253,12 @@ export default function ModalMenuProductoFormulario({ productos,addProducto ,sho
             </div>
         </Modal>
     );
+}
+
+// Función auxiliar para calcular el número de página
+function calculatePageNumber(i, currentPage, totalPages) {
+    if (totalPages <= 5) return i + 1;
+    if (currentPage <= 3) return i + 1;
+    if (currentPage >= totalPages - 2) return totalPages - 4 + i;
+    return currentPage - 2 + i;
 }
