@@ -37,7 +37,6 @@ export default function ModalMenuProductoFormulario({
 
             return isNotInMenu;
         });
-
         setFilteredProducts(filtered);
         setCurrentPage(1);
     }, [searchTerm, productos, menu_productos]);
@@ -61,8 +60,8 @@ export default function ModalMenuProductoFormulario({
         setData('producto', { ...data.producto, producto });
 
         router.visit('/menu-producto', {
-            method : 'post',
-            preserveScroll : true,
+            method: 'post',
+            preserveScroll: true,
             data: {
                 producto: producto,
                 menu: menu
@@ -76,19 +75,6 @@ export default function ModalMenuProductoFormulario({
                 });
             }
         });
-        // post(route('menu-producto.store'), {
-
-        // }, {
-        //     onSuccess: () => {
-        //         Swal.fire({
-        //             title: 'Éxito',
-        //             text: 'Producto agregado correctamente',
-        //             timer: 2000,
-        //             showConfirmButton: false,
-        //             timerProgressBar: true
-        //         });
-        //     }
-        // });
     }
 
     return (
@@ -113,7 +99,7 @@ export default function ModalMenuProductoFormulario({
                     </button>
                 </div>
 
-                <div className="mb-4">
+                <div className="m-4">
                     <input
                         id="search-product-input"
                         type="text"
@@ -125,39 +111,6 @@ export default function ModalMenuProductoFormulario({
                     />
                 </div>
 
-                {/* <div className="mb-4 max-h-96 overflow-y-auto">
-                    {currentProducts.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {currentProducts.map((producto) => (
-                                <div
-                                    key={`product-select-${producto.id}`}
-                                    onClick={() => {
-                                        submitAddProducto(producto);
-                                    }}
-                                    role="button"
-                                    tabIndex="0"
-                                    aria-label={`Seleccionar ${producto.nombre}`}
-                                    onKeyPress={(e) => e.key === 'Enter' && addProducto(producto)}
-                                    className={`p-4 border rounded-md cursor-pointer transition-colors ${selectedProduct?.id === producto.id
-                                            ? 'bg-blue-100 dark:bg-blue-900 border-blue-500'
-                                            : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-                                        }`}
-                                >
-                                    <h3 className="font-medium text-gray-900 dark:text-white">
-                                        {producto.nombre}
-                                    </h3>
-                                    <p className="text-sm font-semibold mt-2">
-                                        Precio: {producto.precio}
-                                    </p>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <p className="text-center py-4 text-gray-500 dark:text-gray-400">
-                            No se encontraron productos disponibles
-                        </p>
-                    )}
-                </div> */}
 
                 <div className="mb-4 max-h-96 overflow-y-auto">
                     {currentProducts.length > 0 ? (
@@ -188,16 +141,35 @@ export default function ModalMenuProductoFormulario({
                                         <h3 className="font-medium text-gray-900 dark:text-white">
                                             {producto.nombre}
                                         </h3>
-                                        <p className="text-sm font-semibold mt-2">
-                                            Precio: {producto.precio}
-                                        </p>
-                                        <button
-                                            type="submit"
-                                            className="mt-2 w-full py-1 bg-green-600 text-white rounded hover:bg-green-700"
-                                            aria-label={`Confirmar agregar ${producto.nombre}`}
-                                        >
-                                            Agregar
-                                        </button>
+
+                                        <div className="flex justify-between items-center mt-2">
+                                            <p>
+                                                Precio: <span className="text-xs px-3 py-2 rounded-full bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
+                                                    {producto.precio}
+                                                </span>
+                                            </p>
+
+                                            <button
+                                                type="submit"
+                                                className="p-1.5 mr-2 rounded-full bg-green-100 text-green-600 hover:bg-green-200 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800 transition-colors"
+
+                                                aria-label={`Confirmar agregar ${producto.nombre}`}
+                                            >
+                                                <svg
+                                                    className="w-5 h-5 flex-shrink-0"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth="2"
+                                                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                                                    ></path>
+                                                </svg>
+                                            </button>
+                                        </div>
                                     </div>
                                 </form>
                             ))}

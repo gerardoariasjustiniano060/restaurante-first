@@ -20,8 +20,8 @@ class MenuProductoController extends Controller
 
     }
 
-    public function edit($id){
-
+    public function edit(Request $request){
+        dd($request);
     }
 
     public function detail($id){
@@ -42,7 +42,14 @@ class MenuProductoController extends Controller
 
     public function update(Request $request, $id)
     {
-        dd($request->all());
+        $producto = ProductoModel::find($request['producto']['id']);
+        $producto->precio = $request['precio'];
+        $producto->update();
+
+        $menu_producto = MenuProductoModel::find($id);
+        $menu_producto->precio = $request['precio'];
+        $menu_producto->precio_combo = $request['precio_combo'];
+        $menu_producto->update();
     }
 
     public function destroy($id)

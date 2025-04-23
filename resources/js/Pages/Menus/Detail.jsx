@@ -90,7 +90,7 @@ export default function Detail({ menu = {}, productos }) {
                                                                     )}
                                                                 </div>
                                                                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                                    ${combo.precio ? parseFloat(combo.precio).toFixed(3) : '0.000'}
+                                                                    ${menuProducto.precio ? parseFloat(menuProducto.precio).toFixed(3) : '0.000'}
                                                                 </span>
                                                             </div>
                                                         </div>

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\InterfazController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\MenuProductoController;
 use App\Http\Controllers\PedidoController;
@@ -64,7 +65,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/menu-producto', [MenuProductoController::class, 'store'])->name('menu-producto.store');
     Route::get('/menu-producto/edit/{id}', [MenuProductoController::class, 'edit'])->name('menu-producto.edit');
     Route::get('/menu-producto/detail/{id}', [MenuProductoController::class, 'detail'])->name('menu-producto.detail');
-    Route::put('/menu-producto/{id}', [MenuProductoController::class, 'update'])->name('menu-producto.update');
+    Route::post('/menu-producto/{id}', [MenuProductoController::class, 'update'])->name('menu-producto.update');
     Route::delete('/menu-producto/{id}', [MenuProductoController::class, 'destroy'])->name('menu-producto.destroy');
 
     Route::get('/pedidos', [PedidoController::class, 'index'])->name('pedidos.index');
@@ -74,6 +75,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/pedido/detail/{id}', [PedidoController::class, 'detail'])->name('pedido.detail');
     Route::put('/pedido/{id}', [PedidoController::class, 'update'])->name('pedido.update');
     Route::delete('/pedido/{id}', [PedidoController::class, 'destroy'])->name('pedido.destroy');
+
+    Route::get('/example_almacen',[InterfazController::class,'example_almacen'])->name('index.almacen.example');
+    Route::get('/example_pedido',[InterfazController::class,'example_pedido'])->name('index.almacen.example');
 });
 
 require __DIR__.'/auth.php';

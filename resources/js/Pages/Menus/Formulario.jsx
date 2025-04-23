@@ -3,6 +3,7 @@ import { Head, router, useForm } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Swal from 'sweetalert2';
 import ModalMenuProductoFormulario from './Components/ModalMenuProductoFormulario';
+import ModalEditProductoPrecioFormulario from './Components/ModalEditProductoPrecioFormulario';
 
 export default function Update({ menu, productos }) {
     const { data, post, put, setData } = useForm({
@@ -13,19 +14,38 @@ export default function Update({ menu, productos }) {
     });
 
     const [showProductModal, setShowProductModal] = useState(false);
-    const [isEdit] = useState(!!menu?.id); // Definimos isEdit correctamente
+    const [showEditProductoPrecioModal, setEditProductoPrecioModal] = useState(false);
+    const [menuProducto, setMenuProducto] = useState(null);
 
     const handleDelete = (index) => {
-        const updatedProducts = [...data.menu_productos];
-        updatedProducts.splice(index, 1);
-        setData('menu_productos', updatedProducts);
-        const { id } = data.menu_productos[index]
+        Swal.fire({
+            title: 'Confirmar eliminación',
+            text: '¿Deseas eliminar este registro permanentemente?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Eliminar',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const updatedProducts = [...data.menu_productos];
+                updatedProducts.splice(index, 1);
+                setData('menu_productos', updatedProducts);
+                const { id } = data.menu_productos[index]
 
-        router.visit(`/menu-producto/${id}`,
-            {
-                method: 'delete',
-                preserveScroll: true
-            });
+                router.visit(`/menu-producto/${id}`,
+                    {
+                        onSuccess: () => {
+                            Swal.fire('Eliminado', 'El registro fue eliminado', 'success');
+                        },
+                        onError: () => {
+                            Swal.fire('Error', 'No se pudo eliminar', 'error');
+                        },
+                        method: 'delete',
+                        preserveScroll: true
+                    });
+            }
+        });
     };
 
     const addProducto = (producto) => {
@@ -45,8 +65,11 @@ export default function Update({ menu, productos }) {
         setShowProductModal(false);
     };
 
-    const handleEditProduct = (index, producto) => {
+    const handleEditProduct = (index, menuProducto) => {
         // Implementa la lógica de edición aquí
+        console.log("editar menuProducto", menuProducto);
+        setMenuProducto({...menuProducto});
+        setEditProductoPrecioModal(true);
     };
 
     const submitMenuUpdate = (e) => {
@@ -180,27 +203,61 @@ export default function Update({ menu, productos }) {
                                                                     <>{menuProducto.producto?.precio}</>
                                                                 </span>
                                                             </div>
+                                                            {menuProducto.combos.length > 0 && <div>
+                                                                Completo :
+                                                                <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                                                    <>{menuProducto?.precio_combo}</>
+                                                                </span>
+                                                            </div>}
 
                                                         </div>
                                                     </div>
                                                 </td>
+
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                                                        {menuProducto.combos && menuProducto.combos.length === 0 && <>
+                                                    <div className="text-sm ">
+                                                        {menuProducto.combos && menuProducto.combos.length === 0 && (
                                                             <div className="mb-3 p-3 border rounded-lg dark:border-gray-600">
-                                                                <div className="flex justify-center items-center">  {/* Centrado horizontal y vertical */}
-                                                                    <span className="px-3 py-2 text-xs rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                                                                <div className="flex items-center">
+                                                                    <button
+                                                                        onClick={() => handleEditProduct(index, menuProducto)}
+                                                                        className="p-1.5 mr-2 rounded-full bg-green-100 text-green-600 hover:bg-green-200 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800 transition-colors"
+                                                                        aria-label="Agregar combo"
+                                                                    >
+                                                                        <svg
+                                                                            className="w-5 h-5 flex-shrink-0"
+                                                                            fill="none"
+                                                                            stroke="currentColor"
+                                                                            viewBox="0 0 24 24"
+                                                                        >
+                                                                            <path
+                                                                                strokeLinecap="round"
+                                                                                strokeLinejoin="round"
+                                                                                strokeWidth="2"
+                                                                                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                                                                            ></path>
+                                                                        </svg>
+                                                                    </button>
+
+                                                                    <span className="text-xs px-3 py-2 rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
                                                                         Producto Individual
                                                                     </span>
                                                                 </div>
                                                             </div>
-                                                        </>}
+                                                        )}
                                                         {menuProducto.combos && menuProducto.combos.map((combo, index) => (
                                                             <div key={index} className="mb-3 p-3 border rounded-lg dark:border-gray-600">
                                                                 <div className="flex items-center m-1">
-                                                                    <svg className="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                                                    </svg>
+                                                                    <button
+                                                                        onClick={() => handleEditProduct(index, menuProducto)}
+                                                                        className="p-1.5 mr-2 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800 transition-colors"
+
+                                                                        aria-label="Editar producto"
+                                                                    >
+                                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                                        </svg>
+                                                                    </button>
                                                                     <div className="flex-1 flex items-center justify-between">
                                                                         <span className="font-medium text-gray-800 dark:text-gray-200">
                                                                             {combo.producto.nombre}
@@ -228,7 +285,7 @@ export default function Update({ menu, productos }) {
                                                     <div className="flex space-x-2">
                                                         <button
                                                             onClick={() => handleEditProduct(index, menuProducto)}
-                                                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 p-1"
+                                                            className="p-1.5 mr-2 rounded-full bg-green-100 text-green-600 hover:bg-green-200 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800 transition-colors"
                                                             aria-label="Editar producto"
                                                         >
                                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -237,7 +294,7 @@ export default function Update({ menu, productos }) {
                                                         </button>
                                                         <button
                                                             onClick={() => handleDelete(index)}
-                                                            className="text-red-600 hover:text-red-900 dark:text-red-400 p-1"
+                                                            className="p-1.5 mr-2 rounded-full bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 transition-colors"
                                                             aria-label="Eliminar producto"
                                                         >
                                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -264,6 +321,13 @@ export default function Update({ menu, productos }) {
                 menu_productos={data.menu_productos}
                 menu={menu}
             />
+
+            <ModalEditProductoPrecioFormulario
+                showEditProductoPrecioModal={showEditProductoPrecioModal}
+                setEditProductoPrecioModal={setEditProductoPrecioModal}
+                menuProducto={menuProducto}
+            />
+
         </AuthenticatedLayout>
     );
 }
