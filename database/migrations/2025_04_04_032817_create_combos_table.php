@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('combos', function (Blueprint $table) {
             $table->id();
             $table->string('descripcion')->nullable();
-            $table->bigInteger('cantidad')->nullable();
+            $table->bigInteger('cantidad')->default(1);
 
             $table->foreignId('menu_producto_id')
                 ->references('id')

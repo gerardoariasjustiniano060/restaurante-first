@@ -3,49 +3,42 @@ import Modal from '@/Components/Modal';
 import Swal from 'sweetalert2';
 import { router, useForm } from '@inertiajs/react';
 
-export default function ModalMenuProductoFormulario({
+export default function ModalAdicionComboProductoFormulario({
     productos,
-    addProducto,
-    showProductModal,
-    setShowProductModal,
-    menu_productos,
-    menu
+    addProductoCombo,
+    showMenuProductoComboModal,
+    setMenuProductoComboModal,
+    menuProducto,
+    menuProductos
 }) {
-    const { data, setData, post, update } = useForm({
-        id: menu.id,
-        producto: null
-    });
-
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(10);
+    const [itemsPerPage] = useState(6); // Cambiado de 10 a 6
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [selectedProduct, setSelectedProduct] = useState(null);
 
     useEffect(() => {
-        const filtered = productos.filter(producto => {
-            const isNotInMenu = !menu_productos.some(item => item.producto_id === producto.id);
+        console.log("tabla menuProductos",menuProductos);
+        if (!searchTerm) {
+            setFilteredProducts(menuProductos);
+            return;
+        }
 
-            if (searchTerm) {
-                const searchTermLower = searchTerm.toLowerCase();
-                return isNotInMenu && [
-                    producto.nombre.toLowerCase(),
-                    producto.descripcion?.toLowerCase(),
-                    producto.categoria?.nombre.toLowerCase()
-                ].some(text => text?.includes(searchTermLower));
-            }
-
-            return isNotInMenu;
+        const searchLower = searchTerm.toLowerCase();
+        const filtered = menuProductos.filter(p => {  // Cambiado de menuProducto a menuProductos
+            const fieldsToSearch = [
+                p.producto.nombre,
+                p.producto.descripcion,
+                p.producto.categoria?.nombre
+            ];
+            return fieldsToSearch.some(
+                field => field?.toLowerCase()?.includes(searchLower)
+            );
         });
+
         setFilteredProducts(filtered);
         setCurrentPage(1);
-    }, [searchTerm, productos, menu_productos]);
-
-    useEffect(() => {
-        if (showProductModal) {
-            document.getElementById('search-product-input')?.focus();
-        }
-    }, [showProductModal]);
+    }, [searchTerm, menuProductos]); // Cambiado de productos a menuProductos
 
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -54,33 +47,15 @@ export default function ModalMenuProductoFormulario({
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-    const submitAddProducto = (producto) => {
-        // e.preventDefault();
-        addProducto(producto);
-        setData('producto', { ...data.producto, producto });
-
-        router.visit('/menu-producto', {
-            method: 'post',
-            preserveScroll: true,
-            data: {
-                producto: producto,
-                menu: menu
-            }, onSuccess: () => {
-                Swal.fire({
-                    title: 'Éxito',
-                    text: 'Producto agregado correctamente',
-                    timer: 2000,
-                    showConfirmButton: false,
-                    timerProgressBar: true
-                });
-            }
-        });
+    const submitAddProductoCombo = (producto) => {
+        addProductoCombo(producto, menuProducto);
+        setMenuProductoComboModal(false); // Cerrar modal después de agregar
     }
 
     return (
         <Modal
-            show={showProductModal}
-            onClose={() => setShowProductModal(false)}
+            show={showMenuProductoComboModal}
+            onClose={() => setMenuProductoComboModal(false)}
             maxWidth="5xl"
             aria-modal="true"
             role="dialog"
@@ -91,7 +66,7 @@ export default function ModalMenuProductoFormulario({
                         Seleccionar Productos
                     </h2>
                     <button
-                        onClick={() => setShowProductModal(false)}
+                        onClick={() => setMenuProductoComboModal(false)}
                         className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                         aria-label="Cerrar modal"
                     >
@@ -111,49 +86,44 @@ export default function ModalMenuProductoFormulario({
                     />
                 </div>
 
-
                 <div className="mb-4 max-h-96 overflow-y-auto">
                     {currentProducts.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {currentProducts.map((producto) => (
+                            {currentProducts.map((menuProducto) => (
                                 <form
-                                    key={`product-form-${producto.id}`}
+                                    key={`product-form-${menuProducto.producto.id}`}
                                     onSubmit={(e) => {
                                         e.preventDefault();
-                                        submitAddProducto(producto);
+                                        submitAddProductoCombo(menuProducto.producto);
                                     }}
-                                    className="contents" // Esto evita que el form afecte el layout
+                                    className="contents"
                                 >
                                     <div
                                         role="button"
                                         tabIndex="0"
-                                        aria-label={`Agregar ${producto.nombre}`}
-                                        className={`p-4 border rounded-md cursor-pointer transition-colors ${selectedProduct?.id === producto.id
-                                            ? 'bg-blue-100 dark:bg-blue-900 border-blue-500'
-                                            : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-                                            }`}
+                                        aria-label={`Agregar ${menuProducto.producto.nombre}`}
+                                        className="p-4 border rounded-md cursor-pointer transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
                                     >
                                         <input
                                             type="hidden"
                                             name="producto_id"
-                                            value={producto.id}
+                                            value={menuProducto.producto.id}
                                         />
                                         <h3 className="font-medium text-gray-900 dark:text-white">
-                                            {producto.nombre}
+                                            {menuProducto.producto.nombre}
                                         </h3>
 
                                         <div className="flex justify-between items-center mt-2">
                                             <p>
                                                 Precio: <span className="text-xs px-3 py-2 rounded-full bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
-                                                    {producto.precio}
+                                                    {menuProducto.producto.precio}
                                                 </span>
                                             </p>
 
                                             <button
                                                 type="submit"
                                                 className="p-1.5 mr-2 rounded-full bg-green-100 text-green-600 hover:bg-green-200 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800 transition-colors"
-
-                                                aria-label={`Confirmar agregar ${producto.nombre}`}
+                                                aria-label={`Confirmar agregar ${menuProducto.producto.nombre}`}
                                             >
                                                 <svg
                                                     className="w-5 h-5 flex-shrink-0"
@@ -199,10 +169,11 @@ export default function ModalMenuProductoFormulario({
                                     <button
                                         key={`page-${pageNum}`}
                                         onClick={() => paginate(pageNum)}
-                                        className={`px-3 py-1 border-t border-b border-gray-300 ${currentPage === pageNum
-                                            ? 'bg-blue-500 text-white'
-                                            : 'bg-white dark:bg-gray-700'
-                                            }`}
+                                        className={`px-3 py-1 border-t border-b border-gray-300 ${
+                                            currentPage === pageNum
+                                                ? 'bg-blue-500 text-white'
+                                                : 'bg-white dark:bg-gray-700'
+                                        }`}
                                         aria-label={`Ir a página ${pageNum}`}
                                         aria-current={currentPage === pageNum ? 'page' : undefined}
                                     >

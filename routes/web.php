@@ -78,6 +78,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/example_almacen',[InterfazController::class,'example_almacen'])->name('index.almacen.example');
     Route::get('/example_pedido',[InterfazController::class,'example_pedido'])->name('index.almacen.example');
+    Route::get('/example_horario',[InterfazController::class,'example_horario'])->name('index.almacen.example');
 });
 
 require __DIR__.'/auth.php';

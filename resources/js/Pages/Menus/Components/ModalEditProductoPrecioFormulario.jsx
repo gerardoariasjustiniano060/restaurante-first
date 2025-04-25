@@ -97,20 +97,22 @@ export default function ModalEditProductoPrecioFormulario({
                             />
                             {errors.precio && <p className="mt-1 text-xs text-red-600">{errors.precio}</p>}
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700">
-                                Precio en Combo
-                            </label>
-                            <input
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                value={data.precio_combo}
-                                onChange={(e) => setData('precio_combo', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
-                            />
-                            {errors.precio_combo && <p className="mt-1 text-xs text-red-600">{errors.precio_combo}</p>}
-                        </div>
+                        {data.combos.length > 0 &&
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Precio en Combo
+                                </label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    value={data.precio_combo}
+                                    onChange={(e) => setData('precio_combo', e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+                                />
+                                {errors.precio_combo && <p className="mt-1 text-xs text-red-600">{errors.precio_combo}</p>}
+                            </div>
+                        }
                         {/* <div>
                             <h3 className="font-medium text-gray-800 p-2">Combos</h3>
                             {formatCombos()}

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('menu_producto', function (Blueprint $table) {
             $table->id();
             $table->decimal('precio', 8, 2);
-            $table->decimal('precio_combo', 8, 2);
+            $table->decimal('precio_combo', 8, 2)->nullable();
             $table->string('descripcion')->nullable();
             $table->boolean('completo')->default(false);
 

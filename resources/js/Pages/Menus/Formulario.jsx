@@ -2,21 +2,27 @@ import { useState, useEffect } from 'react';
 import { Head, router, useForm } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Swal from 'sweetalert2';
-import ModalMenuProductoFormulario from './Components/ModalMenuProductoFormulario';
-import ModalEditProductoPrecioFormulario from './Components/ModalEditProductoPrecioFormulario';
+import ModalEditComboProductoFormulario from './Components/ModalEditComboProductoFormulario';
+import ModalAdicionMenuProductoFormulario from './Components/ModalAdicionMenuProductoFormulario';
 
 export default function Update({ menu, productos }) {
-    const { data, post, put, setData } = useForm({
+    const { data, put, setData } = useForm({
         id: menu?.id || null,
         nombre: menu?.nombre || '',
         descripcion: menu?.descripcion || '',
         menu_productos: menu?.menu_productos || [],
     });
 
-    const [showProductModal, setShowProductModal] = useState(false);
-    const [showEditProductoPrecioModal, setEditProductoPrecioModal] = useState(false);
+    const [showAdicionarProductModal, setAdicionarProductModal] = useState(false);  // para agregar producto a menu producto
+
+    const [showEditComboProductoModal, setEditComboProductoModal] = useState(false);
+    const [showMenuProductoComboModal, setMenuProductoComboModal] = useState(false);
+
+    // const [showEditProductoPrecioModal, setEditProductoPrecioModal] = useState(false);
+
     const [menuProducto, setMenuProducto] = useState(null);
 
+    // Elimina el menu producto
     const handleDelete = (index) => {
         Swal.fire({
             title: 'Confirmar eliminación',
@@ -48,8 +54,31 @@ export default function Update({ menu, productos }) {
         });
     };
 
-    const addProducto = (producto) => {
-        const productoCombos = {
+    //  Adiciona producto combo a menu producto
+    const addComboProducto = (producto, menuProducto) => {
+        const newCombo = {
+            cantidad : 1,
+            descripcion : "sin descripcion",
+            menu_producto: menuProducto.id,
+            producto_id: producto.id,
+            producto: {...producto},
+            // Agrega aquí cualquier otro campo necesario para el combo
+        };
+
+        setData('menu_productos', data.menu_productos.map(item => {
+            if (item.id === menuProducto.id) {
+                return {
+                    ...item,
+                    combos: [...item.combos, newCombo]
+                };
+            }
+            return item;
+        }));
+    }
+
+    // Adiciona producto al menu producto
+    const addMenuProducto = (producto) => {
+        const newMenuProducto = {
             completo: 0,
             descripcion: "sin descripción",
             menu: menu.id,
@@ -61,17 +90,11 @@ export default function Update({ menu, productos }) {
             combos: []
         };
 
-        setData('menu_productos', [...data.menu_productos, productoCombos]);
-        setShowProductModal(false);
+        setData('menu_productos', [...data.menu_productos, newMenuProducto]);
+        setAdicionarProductModal(false);
     };
 
-    const handleEditProduct = (index, menuProducto) => {
-        // Implementa la lógica de edición aquí
-        console.log("editar menuProducto", menuProducto);
-        setMenuProducto({...menuProducto});
-        setEditProductoPrecioModal(true);
-    };
-
+    // Modifica datos basicos del menu
     const submitMenuUpdate = (e) => {
         e.preventDefault();
         put(route('menu.update', data.id), {
@@ -94,6 +117,12 @@ export default function Update({ menu, productos }) {
             }
         });
     };
+
+    // Mostrar menu
+    const showModalMenu = (index, menuProducto) => {
+        setMenuProducto({ ...menuProducto });
+        setEditComboProductoModal(true);
+    }
 
     return (
         <AuthenticatedLayout
@@ -165,7 +194,7 @@ export default function Update({ menu, productos }) {
                                     Productos del Menú
                                 </h3>
                                 <button
-                                    onClick={() => setShowProductModal(true)}
+                                    onClick={() => setAdicionarProductModal(true)}
                                     className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg"
                                     aria-label="Agregar nuevo producto"
                                 >
@@ -215,30 +244,10 @@ export default function Update({ menu, productos }) {
                                                 </td>
 
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm ">
+                                                    <div className="text-sm items-center">
                                                         {menuProducto.combos && menuProducto.combos.length === 0 && (
-                                                            <div className="mb-3 p-3 border rounded-lg dark:border-gray-600">
-                                                                <div className="flex items-center">
-                                                                    <button
-                                                                        onClick={() => handleEditProduct(index, menuProducto)}
-                                                                        className="p-1.5 mr-2 rounded-full bg-green-100 text-green-600 hover:bg-green-200 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800 transition-colors"
-                                                                        aria-label="Agregar combo"
-                                                                    >
-                                                                        <svg
-                                                                            className="w-5 h-5 flex-shrink-0"
-                                                                            fill="none"
-                                                                            stroke="currentColor"
-                                                                            viewBox="0 0 24 24"
-                                                                        >
-                                                                            <path
-                                                                                strokeLinecap="round"
-                                                                                strokeLinejoin="round"
-                                                                                strokeWidth="2"
-                                                                                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                                                                            ></path>
-                                                                        </svg>
-                                                                    </button>
-
+                                                            <div className="rounded-lg dark:border-gray-600">
+                                                                <div className="items-center">
                                                                     <span className="text-xs px-3 py-2 rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
                                                                         Producto Individual
                                                                     </span>
@@ -248,16 +257,6 @@ export default function Update({ menu, productos }) {
                                                         {menuProducto.combos && menuProducto.combos.map((combo, index) => (
                                                             <div key={index} className="mb-3 p-3 border rounded-lg dark:border-gray-600">
                                                                 <div className="flex items-center m-1">
-                                                                    <button
-                                                                        onClick={() => handleEditProduct(index, menuProducto)}
-                                                                        className="p-1.5 mr-2 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800 transition-colors"
-
-                                                                        aria-label="Editar producto"
-                                                                    >
-                                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                                                        </svg>
-                                                                    </button>
                                                                     <div className="flex-1 flex items-center justify-between">
                                                                         <span className="font-medium text-gray-800 dark:text-gray-200">
                                                                             {combo.producto.nombre}
@@ -284,8 +283,8 @@ export default function Update({ menu, productos }) {
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <div className="flex space-x-2">
                                                         <button
-                                                            onClick={() => handleEditProduct(index, menuProducto)}
-                                                            className="p-1.5 mr-2 rounded-full bg-green-100 text-green-600 hover:bg-green-200 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800 transition-colors"
+                                                            onClick={() => showModalMenu(index, menuProducto)}
+                                                            className="p-1.5 mr-2 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800 transition-colors"
                                                             aria-label="Editar producto"
                                                         >
                                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -313,20 +312,29 @@ export default function Update({ menu, productos }) {
                 </div>
             </div>
 
-            <ModalMenuProductoFormulario
-                showProductModal={showProductModal}
-                setShowProductModal={setShowProductModal}
+            {/* tabla de productos */}
+            <ModalAdicionMenuProductoFormulario
+                showAdicionarProductModal={showAdicionarProductModal}
+                setAdicionarProductModal={setAdicionarProductModal}
                 productos={productos}
-                addProducto={addProducto}
-                menu_productos={data.menu_productos}
+                addMenuProducto={addMenuProducto}
+                menuProductos={data.menu_productos}
                 menu={menu}
             />
 
-            <ModalEditProductoPrecioFormulario
-                showEditProductoPrecioModal={showEditProductoPrecioModal}
-                setEditProductoPrecioModal={setEditProductoPrecioModal}
+            {/* Formulario de edicion del menu producto */}
+            <ModalEditComboProductoFormulario
+                setEditComboProductoModal={setEditComboProductoModal}
+                showEditComboProductoModal={showEditComboProductoModal}
                 menuProducto={menuProducto}
+                productos={productos}
+                addComboProducto={addComboProducto}
+                menuProductos={data.menu_productos}
+                menu={menu}
             />
+
+            {/* Modal de Combos */}
+
 
         </AuthenticatedLayout>
     );
