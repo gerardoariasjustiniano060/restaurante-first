@@ -2,8 +2,10 @@ import React, { useState, useEffect, Fragment } from 'react';
 import Swal from 'sweetalert2';
 import { router, useForm } from '@inertiajs/react';
 import ModalAdicionComboProductoFormulario from './ModalAdicionComboProductoFormulario';
+import ModalEditMenuProductoPrecioFormulario from './ModalEditMenuProductoPrecioFormulario';
 
 export default function ModalEditComboProductoFormulario({
+    updatePrecioMenuProducto,
     showEditComboProductoModal,
     setEditComboProductoModal,
     addComboProducto,
@@ -38,22 +40,68 @@ export default function ModalEditComboProductoFormulario({
         addComboProducto(producto, menuProducto);
     };
 
-    const [showModalPrecioPlatoPrincipal,setModalPrecioPlatoPrincipal] = useState(false)
-    const [showModalPrecioCombo,setModalPrecioCombo] = useState(false)
-
+    const [showModalPrecioPlatoPrincipal, setModalPrecioPlatoPrincipal] = useState(false);
+    const [conditionPrecio, setConditionPrecio] = useState(null);
+    const [objectoSeleccionado, setObjectoSeleccionado] = useState({});
 
     const removeCombo = (comboId) => {
         setData('combos', data.combos.filter(combo => combo.id !== comboId));
     };
 
-    const showPrecioPlatoPrincipal = () => {
-        setData('precio',"20.00")
+    const showEditingPrecio = (condition, objecto) => {
+        setConditionPrecio(condition);
+        setObjectoSeleccionado(objecto);
         setModalPrecioPlatoPrincipal(true);
     }
 
-    const showPrecioCombo = () => {
-        setData('precio_combo',"20.50");
-        setModalPrecioCombo(true);
+    // Para el frontend
+    const updatePrecioMenu = (objecto) => {
+        const { conditionPrecio, id, menu_producto, precio, producto } = objecto;
+
+        updatePrecioMenuProducto(objecto);
+
+        if (conditionPrecio === 'precio_producto_principal') {
+            setData('precio', precio);
+        }
+        //     updatePrecioMenuProducto({
+        //         menu_producto: menu_producto,
+        //         precio: precio,
+        //         id: id,
+        //         conditionPrecio: conditionPrecio,
+        //     }); // para el backend
+        // }
+        if (conditionPrecio === 'precio_producto_combo') {
+            setData('combos', data.combos.map(item =>
+                item.id === id
+                    ? {
+                        ...item,
+                        producto: {
+                            ...item.producto,
+                            precio: precio
+                        }
+                    }
+                    : item
+            ));
+
+            //     updatePrecioMenuProducto({
+            //         menu_producto: menu_producto,
+            //         precio: precio,
+            //         id: id,
+            //         conditionPrecio: conditionPrecio,
+            //     }); // para el backend
+
+        }
+
+        if (conditionPrecio === 'precio_producto_total') {
+            setData('precio_combo', precio);
+
+            //     updatePrecioMenuProducto({
+            //         menu_producto: menu_producto,
+            //         precio: precio,
+            //         id: id,
+            //         conditionPrecio: conditionPrecio,
+            //     }); // para el backend
+        }
     }
 
     useEffect(() => {
@@ -70,22 +118,6 @@ export default function ModalEditComboProductoFormulario({
             });
         }
     }, [menuProducto]);
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        router.post(`/menu-producto/${data.id}`, data, {
-            onSuccess: () => {
-                Swal.fire({
-                    title: 'Éxito',
-                    text: 'Producto actualizado correctamente',
-                    timer: 2000,
-                    showConfirmButton: false,
-                    timerProgressBar: true
-                });
-                setEditComboProductoModal(false);
-            }
-        });
-    };
 
     if (!showEditComboProductoModal) return null;
 
@@ -114,7 +146,8 @@ export default function ModalEditComboProductoFormulario({
                             <div className="w-full bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
                                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4">
                                     <div className="mb-3 sm:mb-0">
-                                        <h3 className="text-lg font-semibold text-gray-800">Plato principal: {data.producto.nombre}</h3>
+                                        <h3 className="text-lg font-semibold text-gray-800">
+                                            Plato Principal : {data.producto.nombre}</h3>
                                         <p className="text-sm text-gray-600">Precio:
                                             <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
                                                 {data.precio}
@@ -122,9 +155,12 @@ export default function ModalEditComboProductoFormulario({
                                         </p>
                                     </div>
                                     <div className="flex space-x-2">
-
                                         <button
-                                            onClick={() => showPrecioPlatoPrincipal()}
+                                            onClick={() => showEditingPrecio('precio_producto_principal', {
+                                                id: data.id,
+                                                precio: data.precio,
+                                                title: "Plato " + data.producto.nombre
+                                            })}
                                             className="p-1.5 rounded-full bg-green-100 text-green-600 hover:bg-green-200 transition-colors"
                                         >
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -159,7 +195,11 @@ export default function ModalEditComboProductoFormulario({
                                         </div>
                                         <div className="flex space-x-2">
                                             <button
-                                                onClick={() => removeCombo(combo.id)}
+                                                onClick={() => showEditingPrecio('precio_producto_combo', {
+                                                    id: combo.id,
+                                                    title: "" + combo.producto.nombre,
+                                                    precio: combo.producto?.precio
+                                                })}
                                                 className="p-1.5 rounded-full bg-green-100 text-green-600 hover:bg-green-200 transition-colors"
                                             >
                                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -195,7 +235,11 @@ export default function ModalEditComboProductoFormulario({
                                         </div>
                                         <div className="flex space-x-2">
                                             <button
-                                                onClick={() => showPrecioCombo()}
+                                                onClick={() => showEditingPrecio('precio_producto_total', {
+                                                    id: data.id,
+                                                    title: "Precio principal del combo",
+                                                    precio: data.precio_combo,
+                                                })}
                                                 className="p-1.5 rounded-full bg-green-100 text-green-600 hover:bg-green-200 transition-colors"
                                             >
                                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -232,12 +276,18 @@ export default function ModalEditComboProductoFormulario({
                                 Cerrar
                             </button>
                         </div>
-
                     </div>
-
-
                 </div>
             </div>
+
+            <ModalEditMenuProductoPrecioFormulario
+                showModalPrecioPlatoPrincipal={showModalPrecioPlatoPrincipal}
+                setModalPrecioPlatoPrincipal={setModalPrecioPlatoPrincipal}
+                menuProducto={menuProducto}
+                seleccionadoProducto={objectoSeleccionado}
+                conditionPrecio={conditionPrecio}
+                updatePrecioMenu={updatePrecioMenu}
+            />
 
             {/* Modal para añadir combos */}
             <ModalAdicionComboProductoFormulario

@@ -42,14 +42,29 @@ class MenuProductoController extends Controller
 
     public function update(Request $request, $id)
     {
-        $producto = ProductoModel::find($request['producto']['id']);
-        $producto->precio = $request['precio'];
-        $producto->update();
+        if ($request["conditionPrecio"] === 'precio_producto_principal') {
+            $menu_producto = MenuProductoModel::find($request["id"]);
+            $menu_producto->precio = $request['precio'];
+            $menu_producto->update();
+        }
+        if ($request["conditionPrecio"] === 'precio_producto_combo') {
+            $menu_combo = ComboModel::find($request["id"]);
 
-        $menu_producto = MenuProductoModel::find($id);
-        $menu_producto->precio = $request['precio'];
-        $menu_producto->precio_combo = $request['precio_combo'];
-        $menu_producto->update();
+
+            $producto = ProductoModel::find($menu_combo["producto"]["id"]);
+            $producto->precio = $request["precio"];
+            $producto->update();
+        }
+
+        if ($request["conditionPrecio"] === 'precio_producto_total') {
+            $menu_producto = MenuProductoModel::find($request["id"]);
+            $menu_producto->precio_combo = $request['precio'];
+            $menu_producto->update();
+        }
+
+        $producto = ProductoModel::find($request["producto"]["id"]);
+        $producto->precio = $request["precio"];
+        $producto->update();
     }
 
     public function destroy($id)

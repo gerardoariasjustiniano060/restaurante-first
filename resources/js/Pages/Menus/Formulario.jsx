@@ -23,7 +23,7 @@ export default function Update({ menu, productos }) {
     const [menuProducto, setMenuProducto] = useState(null);
 
     // Elimina el menu producto
-    const handleDelete = (index) => {
+    const handleDelete = (index, menu_producto = {}) => {
         Swal.fire({
             title: 'Confirmar eliminación',
             text: '¿Deseas eliminar este registro permanentemente?',
@@ -38,6 +38,16 @@ export default function Update({ menu, productos }) {
                 updatedProducts.splice(index, 1);
                 setData('menu_productos', updatedProducts);
                 const { id } = data.menu_productos[index]
+
+
+
+                // setData();
+                // const auxiliar = menu_producto;
+                // const updateProductCombos = [...data.menu_productos];
+
+                // updateProductCombos.map(item => ({
+                //     combos: item.combos.map(combo => )
+                // }))
 
                 router.visit(`/menu-producto/${id}`,
                     {
@@ -57,12 +67,11 @@ export default function Update({ menu, productos }) {
     //  Adiciona producto combo a menu producto
     const addComboProducto = (producto, menuProducto) => {
         const newCombo = {
-            cantidad : 1,
-            descripcion : "sin descripcion",
+            cantidad: 1,
+            descripcion: "sin descripcion",
             menu_producto: menuProducto.id,
             producto_id: producto.id,
-            producto: {...producto},
-            // Agrega aquí cualquier otro campo necesario para el combo
+            producto: { ...producto },
         };
 
         setData('menu_productos', data.menu_productos.map(item => {
@@ -122,6 +131,41 @@ export default function Update({ menu, productos }) {
     const showModalMenu = (index, menuProducto) => {
         setMenuProducto({ ...menuProducto });
         setEditComboProductoModal(true);
+    }
+
+    const updatePrecioMenuProducto = (objecto) => {
+        if (objecto.conditionPrecio === 'precio_producto_principal') {
+            console.log("data", data.menu_productos);
+            setData('menu_productos', data.menu_productos.map(item =>
+                item.id === objecto.id
+                    ? { ...item, precio: objecto.precio, ...item.producto, precio: objecto.precio }
+                    : item
+            ));
+        }
+        if (objecto.conditionPrecio === 'precio_producto_combo') {
+            setData('menu_productos', data.menu_productos.map(item => ({
+                ...item,
+                combos: item.combos.map(combo =>
+                    combo.id === objecto.id
+                        ? {
+                            ...combo,
+                            producto: {
+                                ...combo.producto,
+                                precio: objecto.precio
+                            }
+                        }
+                        : combo
+                )
+            })));
+        }
+
+        if (objecto.conditionPrecio === 'precio_producto_total') {
+            setData('menu_productos', data.menu_productos.map(item =>
+                item.id === objecto.id
+                    ? { ...item, precio_combo: objecto.precio }
+                    : item
+            ));
+        }
     }
 
     return (
@@ -229,7 +273,7 @@ export default function Update({ menu, productos }) {
                                                             <div>
                                                                 Precio :
                                                                 <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                                                    <>{menuProducto.producto?.precio}</>
+                                                                    <>{menuProducto?.precio}</>
                                                                 </span>
                                                             </div>
                                                             {menuProducto.combos.length > 0 && <div>
@@ -262,7 +306,7 @@ export default function Update({ menu, productos }) {
                                                                             {combo.producto.nombre}
                                                                         </span>
                                                                         <span className="ml-2 px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                                                            ${menuProducto.precio}
+                                                                            ${combo.producto.precio}
                                                                         </span>
                                                                     </div>
                                                                 </div>
@@ -292,7 +336,7 @@ export default function Update({ menu, productos }) {
                                                             </svg>
                                                         </button>
                                                         <button
-                                                            onClick={() => handleDelete(index)}
+                                                            onClick={() => handleDelete(index, menuProducto)}
                                                             className="p-1.5 mr-2 rounded-full bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 transition-colors"
                                                             aria-label="Eliminar producto"
                                                         >
@@ -331,6 +375,7 @@ export default function Update({ menu, productos }) {
                 addComboProducto={addComboProducto}
                 menuProductos={data.menu_productos}
                 menu={menu}
+                updatePrecioMenuProducto={updatePrecioMenuProducto}
             />
 
             {/* Modal de Combos */}
