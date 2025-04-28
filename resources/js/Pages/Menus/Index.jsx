@@ -122,7 +122,7 @@ export default function Index({ menus, filters }) {
                                                 <div className="flex space-x-2">
                                                     <button
                                                         onClick={() => startEditing(men)}
-                                                        className="text-blue-600 ho ver:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 p-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+                                                        className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 p-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
                                                         title="Editar"
                                                     >
                                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

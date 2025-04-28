@@ -1,22 +1,18 @@
 import { useState } from 'react';
-import { Head, useForm, usePage } from '@inertiajs/react';
-import iziToast from 'izitoast';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
 import sweetAlert from 'sweetalert2'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import Form from '@/Components/Form';
+import InputForm from '@/Components/InputForm';
 
-export default function Formulario({ categoria = {} , isEdit }) {
-    const { data, post, get, processing, reset, errors, setData, setError } = useForm({
-        id : categoria?.id || null,
-        nombre : categoria?.nombre|| ''
+export default function Formulario({ categoria = {}, isEdit }) {
+    const { data, post, processing, errors, setData } = useForm({
+        id: categoria?.id || null,
+        nombre: categoria?.nombre || ''
     });
-
-    const cancel = () => {
-        get(route('categorias.index'), {  }, { preserveState: true, replace: true });
-    }
 
     const submit = (e) => {
         e.preventDefault();
-
         const routeName = isEdit ? 'categoria.update' : 'categoria.store';
         const method = isEdit ? put : post;
 
@@ -24,8 +20,8 @@ export default function Formulario({ categoria = {} , isEdit }) {
             onSuccess: () => {
                 sweetAlert.fire({
                     title: 'Éxito',
-                    text : isEdit ? 'Categoría actualizada' : 'Categoría creada',
-                    timer : 2000,
+                    text: isEdit ? 'Categoría actualizada' : 'Categoría creada',
+                    timer: 2000,
                     showConfirmButton: false, // Esta línea oculta el botón OK
                     timerProgressBar: true // Opcional: muestra una barra de progreso
                 });
@@ -33,12 +29,19 @@ export default function Formulario({ categoria = {} , isEdit }) {
             onError: (errors) => {
                 sweetAlert.fire({
                     title: 'Error',
-                    text : 'Por favor corrige los errores',
-                    timer : 2000,
-                    showConfirmButton : false
+                    text: 'Por favor corrige los errores',
+                    timer: 2000,
+                    showConfirmButton: false
                 });
             }
         });
+    }
+
+    const cancel = () => {
+        router.visit(route('categorias.index'), {
+            preserveState: true,
+            replace: true
+        })
     }
 
     return (
@@ -51,7 +54,7 @@ export default function Formulario({ categoria = {} , isEdit }) {
                 }
             >
 
-            <Head title="Categorías" />
+                <Head title="Categorías" />
 
                 <div className="pt-6">
                     <div className="w-full mx-auto sm:px-6 lg:px-8">
@@ -61,44 +64,18 @@ export default function Formulario({ categoria = {} , isEdit }) {
                                     {isEdit ? 'Editar Categoría' : 'Crear Nueva Categoría'}
                                 </h2>
 
-                                <form onSubmit={submit} className="space-y-4">
+                                <Form submit={submit} cancel={cancel} processing={processing} >
                                     <div>
-                                        <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                            Nombre de la categoría
-                                        </label>
-                                        <input
-                                            id="nombre"
-                                            type="text"
-                                            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out ${errors.nombre
-                                                ? 'border-red-500 dark:border-red-500'
-                                                : 'border-gray-300 dark:border-gray-700'
-                                                } bg-white dark:bg-gray-800 dark:text-white`}
-                                            value={data.nombre}
-                                            onChange={(e) => setData('nombre',e.target.value)}
-                                            placeholder="Ej. Electrónica, Ropa, etc."
+                                        <InputForm
+                                            title={'Nombre de la categoría'}
+                                            errors={errors.nombre}
+                                            data={data.nombre}
+                                            setData={setData}
+                                            key={'nombre'}
+                                            placeholder='Categoria...'
                                         />
-                                        {errors.nombre && (
-                                            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.nombre}</p>
-                                        )}
                                     </div>
-
-                                    <div className="flex justify-end space-x-3">
-                                        <button
-                                            type="button"
-                                            onClick={cancel}
-                                            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
-                                        >
-                                            Cancelar
-                                        </button>
-                                        <button
-                                            disabled={processing}
-                                            type="submit"
-                                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                                        >
-                                            Guardar
-                                        </button>
-                                    </div>
-                                </form>
+                                </Form>
                             </div>
                         </div>
                     </div>

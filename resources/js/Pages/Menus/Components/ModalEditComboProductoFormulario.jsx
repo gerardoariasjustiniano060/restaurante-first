@@ -89,7 +89,6 @@ export default function ModalEditComboProductoFormulario({
             //         id: id,
             //         conditionPrecio: conditionPrecio,
             //     }); // para el backend
-
         }
 
         if (conditionPrecio === 'precio_producto_total') {

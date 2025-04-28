@@ -32,6 +32,12 @@ class CajaModel extends Model
     {
         return $this->hasMany(PedidoModel::class,'caja_id');
     }
+
+    public function usuario()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
 }
 
 

@@ -41,13 +41,7 @@ export default function Update({ menu, productos }) {
 
 
 
-                // setData();
-                // const auxiliar = menu_producto;
-                // const updateProductCombos = [...data.menu_productos];
 
-                // updateProductCombos.map(item => ({
-                //     combos: item.combos.map(combo => )
-                // }))
 
                 router.visit(`/menu-producto/${id}`,
                     {

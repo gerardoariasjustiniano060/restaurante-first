@@ -33,6 +33,21 @@ export default function Index({ clientes, filters }) {
         router.get(route('cliente.create'));
     };
 
+        // Función para navegar a la página anterior
+        const goToPreviousPage = () => {
+            if (clientes.current_page > 1) {
+                router.visit(clientes.prev_page_url, { preserveScroll: true });
+            }
+        };
+
+        // Función para navegar a la página siguiente
+        const goToNextPage = () => {
+            if (clientes.current_page < clientes.last_page) {
+                router.visit(clientes.next_page_url, { preserveScroll: true });
+            }
+        };
+
+
     return (
         <AuthenticatedLayout
             header={
@@ -151,25 +166,56 @@ export default function Index({ clientes, filters }) {
             <div className="pt-6">
                 <div className="w-full mx-auto sm:px-6 lg:px-8">
                     <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-4">
-                        <div className="flex items-center justify-between flex-wrap">
-                            <span className="text-sm text-gray-700 dark:text-gray-300 mb-2 sm:mb-0">
-                                Página <strong>{clientes.current_page}</strong> de <strong>{clientes.last_page}</strong>
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-700 dark:text-gray-300">
+                                Mostrando página <strong>{clientes.current_page}</strong> de <strong>{clientes.last_page}</strong>
                             </span>
 
-                            <div className="flex flex-wrap gap-1">
-                                {clientes.links.map((link, i) => (
-                                    <button
-                                        key={i}
-                                        disabled={!link.url}
-                                        onClick={() => link.url && router.visit(link.url, { preserveScroll: true })}
-                                        className={`
-                                px-3 py-1 text-sm rounded-md
-                                ${link.active ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-white'}
-                                ${!link.url ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-500 hover:text-white transition'}
-                            `}
-                                        dangerouslySetInnerHTML={{ __html: link.label }}
-                                    />
-                                ))}
+                            <div className="flex items-center gap-2">
+                                {/* Botón Anterior */}
+                                <button
+                                    onClick={goToPreviousPage}
+                                    disabled={!clientes.prev_page_url}
+                                    className={`p-2 rounded-full ${!clientes.prev_page_url
+                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500'
+                                        : 'bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50'}
+                                        transition-colors`}
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                </button>
+
+                                {/* Números de página */}
+                                <div className="flex gap-1">
+                                    {clientes.links.slice(1, -1).map((link, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => link.url && router.visit(link.url, { preserveScroll: true })}
+                                            className={`w-10 h-10 rounded-full flex items-center justify-center text-sm
+                                                ${link.active
+                                                    ? 'bg-blue-600 text-white'
+                                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'}
+                                                transition-colors`}
+                                        >
+                                            {link.label}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Botón Siguiente */}
+                                <button
+                                    onClick={goToNextPage}
+                                    disabled={!clientes.next_page_url}
+                                    className={`p-2 rounded-full ${!clientes.next_page_url
+                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500'
+                                        : 'bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50'}
+                                        transition-colors`}
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
                             </div>
                         </div>
                     </div>
