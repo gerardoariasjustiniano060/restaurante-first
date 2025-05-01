@@ -5,7 +5,7 @@ const Table = ({
 }) => {
     return (
         <Fragment>
-            <table className=" w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <table className="w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead className="bg-gray-50 dark:bg-gray-700">
                     {columns.length > 0 ? <tr>
                         {columns.map((column) => {
@@ -20,25 +20,23 @@ const Table = ({
                     }
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    {data.map((item) => {
+                    {data.map((item, indexItem) => {
                         return (
-                            <tr key={item.id}>
-                                {columns.map((column) => {
+                            <tr key={indexItem}>
+                                {columns.map((column, indexCol) => {
                                     return (
                                         <td
-                                            key={`${column.key}`}
+                                            key={`${indexItem}-${indexCol}`}
                                             className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white"
                                         >
-                                            {column.render ? column.render(item) : item[column.field]}
+                                            {column.render ? column.render(item, indexItem) : item[column.field]}
                                         </td>)
                                 })}
                             </tr>)
                     })}
                 </tbody>
             </table>
-
         </Fragment>
-
     );
 };
 

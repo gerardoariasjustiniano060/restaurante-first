@@ -1,7 +1,7 @@
 
 import { Head, router, usePage } from '@inertiajs/react';
 
-export default function BtnEdit({
+export default function BtnEditCircle({
     item, editing , ...props
 }) {
 

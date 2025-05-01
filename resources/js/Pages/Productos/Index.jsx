@@ -7,11 +7,12 @@ import Table from '@/Components/Table';
 import FormSearch from '@/Components/FormSearch';
 import BtnCreate from '@/Components/BtnCreate';
 import CardBody from '@/Components/CardBody';
-import BtnEdit from '@/Components/BtnEdit';
-import BtnDelete from '@/Components/BtnDelete';
+import BtnEdit from '@/Components/BtnEditCircle';
+import BtnDelete from '@/Components/BtnDeleteCircle';
 import Pagination from '@/Components/Pagination';
 
 export default function Index({ productos, filters }) {
+
 
     const handleDelete = (id) => {
         Swal.fire({

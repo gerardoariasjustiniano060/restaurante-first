@@ -31,10 +31,13 @@ class MenuController extends Controller
 
     public function create(){
         $menu = new MenuModel();
+        $productos = ProductoModel::with('categoria')->get();
 
-        return Inertia::render('Menus/Formulario',[
+
+        return Inertia::render('Menus/Save',[
             'isEdit' => false,
-            'menu' => $menu
+            'menu' => $menu,
+            'productos' => $productos
         ]);
     }
 
@@ -42,11 +45,11 @@ class MenuController extends Controller
         $menu = $menu = MenuModel::with([
             'menu_productos.producto.categoria', // Carga cada producto asociado
             'menu_productos.combos.producto' // Carga los combos y sus productos relacionados
-        ])->find($id); 
-        
+        ])->find($id);
+
         $productos = ProductoModel::with('categoria')->get();
 
-        return Inertia::render('Menus/Formulario',[
+        return Inertia::render('Menus/Update',[
             'isEdit' => false,
             'menu' => $menu,
             'productos' => $productos
@@ -57,8 +60,8 @@ class MenuController extends Controller
         $menu = $menu = MenuModel::with([
             'menu_productos.producto.categoria', // Carga cada producto asociado
             'menu_productos.combos.producto' // Carga los combos y sus productos relacionados
-        ])->find($id); 
-        
+        ])->find($id);
+
         return Inertia::render('Menus/Detail',[
             'menu' => $menu,
         ]);
@@ -74,7 +77,7 @@ class MenuController extends Controller
         $menu = MenuModel::create($validated);
 
         foreach ($request->productos as $key => $producto) {
-            
+
             $menu_producto = MenuProductoModel::create([
                 'precio' => $producto->precio,
                 'descripcion' => $producto->descripcion,
@@ -88,7 +91,7 @@ class MenuController extends Controller
                     'precio' =>  $combo->precio,
                     'descripcion' =>  $combo->descripcion,
                     'producto_id' =>  $combo->producto_id,
-                    'menu_producto_id' =>  $menu_producto->id, 
+                    'menu_producto_id' =>  $menu_producto->id,
                 ]);
             }
         }

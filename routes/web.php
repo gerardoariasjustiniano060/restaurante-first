@@ -60,8 +60,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/menu/{id}', [MenuController::class, 'destroy'])->name('menu.destroy');
 
 
-    Route::get('/menu-productos', [MenuProductoController::class, 'index'])->name('menus.index');
-    Route::get('/menu-producto/create', [MenuProductoController::class, 'create'])->name('menu.create');
+    Route::get('/menu-productos', [MenuProductoController::class, 'index'])->name('menu-productos.index');
+    Route::get('/menu-producto/create', [MenuProductoController::class, 'create'])->name('menu-producto.create');
     Route::post('/menu-producto', [MenuProductoController::class, 'store'])->name('menu-producto.store');
     Route::get('/menu-producto/edit/{id}', [MenuProductoController::class, 'edit'])->name('menu-producto.edit');
     Route::get('/menu-producto/detail/{id}', [MenuProductoController::class, 'detail'])->name('menu-producto.detail');

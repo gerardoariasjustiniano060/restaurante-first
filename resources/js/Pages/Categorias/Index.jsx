@@ -7,8 +7,8 @@ import Table from '@/Components/Table';
 import FormSearch from '@/Components/FormSearch';
 import BtnCreate from '@/Components/BtnCreate';
 import CardBody from '@/Components/CardBody';
-import BtnEdit from '@/Components/BtnEdit';
-import BtnDelete from '@/Components/BtnDelete';
+import BtnEdit from '@/Components/BtnEditCircle';
+import BtnDeleteCircle from '@/Components/BtnDeleteCircle';
 import Pagination from '@/Components/Pagination';
 
 export default function Index({ categorias, filters }) {
@@ -21,7 +21,7 @@ export default function Index({ categorias, filters }) {
                 return (
                     <div className='className="flex space-x-2"'>
                         <BtnEdit editing={editing} item={item} />
-                        <BtnDelete deleting={handleDelete} item={item}></BtnDelete>
+                        <BtnDeleteCircle deleting={handleDelete} item={item}></BtnDeleteCircle>
                     </div>
                 )
             }

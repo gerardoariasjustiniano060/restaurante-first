@@ -1,11 +1,14 @@
 import { useState } from 'react';
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
 import iziToast from 'izitoast';
 import sweetAlert from 'sweetalert2'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import Form from '@/Components/Form';
+import InputForm from '@/Components/InputForm';
+import Select from '@/Components/Select';
 
 export default function Formulario({ producto = {}, isEdit, categorias }) {
-    const { data, post, get, processing, reset, errors, setData, setError } = useForm({
+    const { data, post, processing, errors, setData } = useForm({
         id: producto?.id || null,
         nombre: producto?.nombre || '',
         precio: producto?.precio || '',
@@ -13,7 +16,10 @@ export default function Formulario({ producto = {}, isEdit, categorias }) {
     });
 
     const cancel = () => {
-        get(route('productos.index'), {}, { preserveState: true, replace: true });
+        router.visit(route('productos.index'), {
+            preserveState: true,
+            replace: true
+        })
     }
 
     const submit = (e) => {
@@ -63,49 +69,43 @@ export default function Formulario({ producto = {}, isEdit, categorias }) {
                                     {isEdit ? 'Editar Categoría' : 'Crear Nueva Categoría'}
                                 </h2>
 
-                                <form onSubmit={submit} className="space-y-4">
+                                <Form submit={submit} cancel={cancel} processing={processing}>
                                     <div>
-                                        <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                            Nombre de producto
-                                        </label>
-                                        <input
-                                            id="nombre"
-                                            type="text"
-                                            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out ${errors.nombre
-                                                ? 'border-red-500 dark:border-red-500'
-                                                : 'border-gray-300 dark:border-gray-700'
-                                                } bg-white dark:bg-gray-800 dark:text-white`}
-                                            value={data.nombre}
-                                            onChange={(e) => setData('nombre', e.target.value)}
-                                            placeholder="Ej. Electrónica, Ropa, etc."
+                                        <InputForm
+                                            title={'Nombre del Producto'}
+                                            errors={errors.nombre}
+                                            data={data.nombre}
+                                            setData={setData}
+                                            key={'nombre'}
+                                            placeholder='Producto...'
                                         />
-                                        {errors.nombre && (
-                                            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.nombre}</p>
-                                        )}
                                     </div>
 
                                     <div>
-                                        <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                            Precio de producto
-                                        </label>
-                                        <input
-                                            id="nombre"
-                                            type="number"
-                                            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out ${errors.nombre
-                                                ? 'border-red-500 dark:border-red-500'
-                                                : 'border-gray-300 dark:border-gray-700'
-                                                } bg-white dark:bg-gray-800 dark:text-white`}
-                                            value={data.precio}
-                                            onChange={(e) => setData('precio', e.target.value)}
-                                            placeholder="Precio"
+                                        <InputForm
+                                            title={'Precio del Producto'}
+                                            inputType='number'
+                                            errors={errors.precio}
+                                            data={data.precio}
+                                            setData={setData}
+                                            key={'precio'}
                                         />
-                                        {errors.precio && (
-                                            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.precio}</p>
-                                        )}
                                     </div>
 
+
                                     <div>
-                                        <label for="categoriaId"
+                                        <Select
+                                            data={categorias}
+                                            setData={setData}
+                                            errors={errors.categoria_id}
+                                            field='categoria_id'
+                                            option={{value : 'categoria_id', text : 'nombre'}}
+                                            subTitle='Lista de categorias'
+                                            title='Categoria'
+                                        >
+
+                                    </Select>
+                                    {/* <label htmlFor="categoriaId"
                                             className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Categoría:</label>
                                         <select
                                             onChange={(e) => setData('categoria_id', e.target.value)}
@@ -113,38 +113,23 @@ export default function Formulario({ producto = {}, isEdit, categorias }) {
                                             <option value="">Seleccione una categoría</option>
                                             {categorias.map((cat) => {
                                                 return (
-                                                    <option value={cat.id}>{cat.nombre}</option>
+                                                    <option key={cat.id} value={cat.id}>{cat.nombre}</option>
                                                 )
                                             })}
 
                                         </select>
                                         {errors.categoria_id && (
                                             <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.categoria_id}</p>
-                                        )}
-                                    </div>
-
-                                    <div className="flex justify-end space-x-3">
-                                        <button
-                                            type="button"
-                                            onClick={cancel}
-                                            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
-                                        >
-                                            Cancelar
-                                        </button>
-                                        <button
-                                            disabled={processing}
-                                            type="submit"
-                                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                                        >
-                                            Guardar
-                                        </button>
-                                    </div>
-                                </form>
+                                        )} */}
                             </div>
-                        </div>
+
+
+                        </Form>
                     </div>
                 </div>
-            </AuthenticatedLayout>
+            </div>
+        </div >
+            </AuthenticatedLayout >
         </>
     );
 }

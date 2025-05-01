@@ -3,7 +3,7 @@ import { Head, useForm, usePage, router } from '@inertiajs/react';
 import Swal from 'sweetalert2';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
-export default function Detail({ menu = {}, productos }) {
+export default function Detail({ menu = {} }) {
     const { menu_productos  } = menu;
 
     const cancel = () => {

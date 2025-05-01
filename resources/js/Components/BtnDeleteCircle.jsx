@@ -1,6 +1,6 @@
 import React from 'react';
 
-const BtnDelete = ({
+const BtnDeleteCircle = ({
     item, deleting , ...props
 }) => {
     return (
@@ -19,4 +19,4 @@ const BtnDelete = ({
 };
 
 
-export default BtnDelete;
+export default BtnDeleteCircle;
